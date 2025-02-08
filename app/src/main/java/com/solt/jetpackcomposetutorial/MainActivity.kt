@@ -1,6 +1,7 @@
 package com.solt.jetpackcomposetutorial
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,15 +16,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -54,10 +65,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             JetpackComposeTutorialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                   ChristmasGreeting(name = "Garbi",Modifier.padding(innerPadding))
-                   ChristmasGreeting(name = "Ralphi",Modifier.padding(innerPadding))
-                }
+                ColorTextChanger()
             }
         }
     }
@@ -216,10 +224,108 @@ fun ChristmasGreeting(name:String,modifier: Modifier = Modifier,color:Color = Co
 @Composable
 fun GreetingPreview() {
     JetpackComposeTutorialTheme {
-        usingKotlinSyntaxInComposable(num =6)
+
     }
     //Composables are drawn on top of each other so for us to arrange them in an orderly manner we will need layouts
     //We have the column composable which layouts elements vertically
     //We also have the row composable which layouts elements horizontally
     //And the box which layouts them in a z order
 }
+
+//We all remember Recycler Views and hard it was it was to create them so in compose
+//We have lazy layouts which only load content when needed  like the recycler view
+//We have LazyColumn, LazyRow ,LazyGrid both vertical and horizontal and LazyStaggeredGrids bot horizontal and vertical
+//There resemble the settings we set on the LayoutManager of the Recycler View
+@Composable
+fun listOfDucks(list: List<String>){
+    LazyColumn {
+        //In the lazyListScope 
+        //We can define an item 
+        item { Text("StartOfLazyColumn") }
+        
+        //Items 
+        items(50){
+            Box(
+                Modifier
+                    .background(Color.Red)
+                    .size(50.dp))
+        }
+        //Items from a list or an array 
+        items(list){
+            Text(text = it)
+        }
+        
+        
+    }
+}
+
+//We want to see how state works in Jetpack compose since the UI is controlled by state
+@Composable
+fun onButtonClick(){
+
+    //In Compose Ui is based on state so anything in the screen is based on a state
+    //Lets  use the variable count as the state for the composable
+    //in the button we update
+    //The ui didnt update
+    //Why ??
+    //This is because Compose doesnt just recompose or compose a composable because any value change
+    //It does this with only State variables
+    //When these values change Compose is informed and is notified that the state change so the ui needs to change as Ui reflects state
+    //Lets make count a state object
+    //But it isnt still working so what do we do
+    //Remember Compose recomposes composable functions when the state changes
+    //So the function will be called again and the mutable state will be created again
+    //So we are back to zero
+    //so how do we store a state composable through recompositions
+    //We use the remember delegate function
+    //It will calculate or create the state on the first composition and store it through out recompositions until it is removed
+
+    Log.i("Recompose","Funcction called again ")
+    //As we can see from the log the function is called again
+    //So we can now see that the UI is the mirror of the state
+        //We can also use delegate function remember
+    //The remember function does save state after each recomposition but not after configuration changes
+    //so we use rememberSaveable
+   var count by rememberSaveable {
+       mutableStateOf(0) }
+    Column(modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center) {
+           Text(text = "Num : $count" ,Modifier.border(2.dp,Color.Transparent), fontSize = 16.sp)
+           Button(onClick = {
+             count++
+               //In the on click we want to increase the button
+           }){
+               //In a button u can put anything because in compose this is abox deep within
+               Text("CLICK ME !")
+           }
+
+    }
+}
+
+//State can be passed from one composable to another
+//And the composable that use the state will be recomposed when the state changes
+@Composable
+fun colorNumberDisplayer (num : Int){
+    Text(text = num.toString() , color = Color(num,num,num))
+}
+//Yay we could now see that state can be passed from one composable to another Thanks
+@Composable
+fun ColorTextChanger () {
+    var num by rememberSaveable {
+        mutableStateOf(0)
+    }
+
+    Column(modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center) {
+        colorNumberDisplayer(num = num)
+        Button(onClick = {
+            num = (0..255).random()
+        }) {
+            Text("Change Color")
+        }
+
+    }
+}
+
