@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,14 +15,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 
@@ -128,6 +141,51 @@ fun threeBoxes(){
     }
 }
 @Composable
+fun imageViewer(){
+    //We will be looking at how we can add images to composables
+    //using the image composable
+    //Painter resource is like setting app:srcCompat to ImageView in xml
+    //We can customize the image in many ways
+    //Like bluring it, color filter ,color matrix etc
+    Image(
+        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+        contentDescription = "TestImage",
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(CircleShape)
+            .blur(3.dp)
+            .background(Color.Magenta)
+        ,
+
+    )
+}
+@Composable
+fun iconViewer(){
+   //We also have the icon which is a way of displaying icons it uses the theme color and gives u access to Material Icons
+    Icon(
+        imageVector = Icons.Default.Edit,
+        contentDescription = null
+    )
+}
+
+@Composable
+fun usingKotlinSyntaxInComposable(value:String ="Default",num :Int =1){
+  //We can use the kotlin syntax in composables
+    //To make very intresting layouts
+    //Here we use the for each to create multiple elements based on the num parameter and define thier text color and font size
+
+    Column(){
+        for(i in 1 ..num){
+            Text(value,fontSize =(value.length*2).sp,
+                color = when{
+                    i%2 ==0->Color.Blue
+                    else -> {Color.Magenta}
+                })
+        }
+    }
+
+}
+@Composable
 fun ChristmasGreeting(name:String,modifier: Modifier = Modifier,color:Color = Color.Magenta){
  Text(
      text = "Merry Christmas , $name",
@@ -158,7 +216,7 @@ fun ChristmasGreeting(name:String,modifier: Modifier = Modifier,color:Color = Co
 @Composable
 fun GreetingPreview() {
     JetpackComposeTutorialTheme {
-         threeBoxes()
+        usingKotlinSyntaxInComposable(num =6)
     }
     //Composables are drawn on top of each other so for us to arrange them in an orderly manner we will need layouts
     //We have the column composable which layouts elements vertically
